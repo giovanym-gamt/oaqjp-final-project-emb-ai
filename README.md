@@ -1,2 +1,3 @@
-[# Repository for final project
-](https://github.com/giovanym-gamt/oaqjp-final-project-emb-ai/blob/main/README.md)
+# Final project
+
+Emotion Detection web application built with Python, Flask and the Watson NLP embedded library (EmotionPredict).
