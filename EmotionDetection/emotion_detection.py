@@ -1,17 +1,31 @@
+"""Emotion detection module using the Watson NLP EmotionPredict function."""
 import json
 import requests
 
+URL = ('https://sn-watson-emotion.labs.skills.network/v1/'
+       'watson.runtime.nlp.v1/NlpService/EmotionPredict')
+HEADERS = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
+
+
 def emotion_detector(text_to_analyze):
-    url = 'https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict'
-    headers = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
-    input_json = { "raw_document": { "text": text_to_analyze } }
-    response = requests.post(url, json=input_json, headers=headers)
+    """Analyze the given text and return the emotion scores and the dominant emotion."""
+    input_json = {"raw_document": {"text": text_to_analyze}}
+    response = requests.post(URL, json=input_json, headers=HEADERS, timeout=30)
 
-    # Convert the response text into a dictionary
+    # Blank entries: the service answers with status code 400
+    if response.status_code == 400:
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
+
     formatted_response = json.loads(response.text)
-
-    # Extract the required set of emotions with their scores
     emotions = formatted_response['emotionPredictions'][0]['emotion']
+
     result = {
         'anger': emotions['anger'],
         'disgust': emotions['disgust'],
@@ -19,7 +33,5 @@ def emotion_detector(text_to_analyze):
         'joy': emotions['joy'],
         'sadness': emotions['sadness']
     }
-
-    # Dominant emotion = emotion with the highest score
     result['dominant_emotion'] = max(result, key=result.get)
     return result
